@@ -3,4 +3,7 @@ name = "account-tracker"
 version = "0.1.0"
 description = "Add your description here"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "python-dotenv>=1.1.0",
+    "schwabdev>=2.5.0",
+]
