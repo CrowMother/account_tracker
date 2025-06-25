@@ -6,6 +6,7 @@ import schwabdev
 from datetime import datetime, timezone, timedelta
 import time
 import requests
+import json
 # Press Ctrl+F5 to execute it or replace it with your code.
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -95,9 +96,67 @@ def get_secret(key, path="./"):
         logging.error(f"Error getting secret from {path}: {e}")
         return None
 
-def get_last_week_trades(client, status= "FILLED", delta = 168):
+def get_last_week_trades(client, status= "FILLED", delta = 24):
     json_data = client.get_account_positions(status, delta)
     return json_data
+
+def extract_nested_value(obj, path, context=None):
+    """
+    Safely navigates a nested structure using a list of keys/indexes.
+    Supports placeholder substitution like "{leg}".
+    """
+    context = context or {}
+    for key in path:
+        # Replace placeholders like "{leg}" using context
+        if isinstance(key, str) and key.startswith("{") and key.endswith("}"):
+            key = context.get(key.strip("{}"))
+
+        try:
+            obj = obj[key]
+        except (KeyError, IndexError, TypeError):
+            return None
+    return obj
+
+
+def extract_and_append(trade, mapping, leg_index):
+    """
+    Builds a flat dictionary by extracting values from trade using mapping rules,
+    where "{leg}" placeholders are substituted with the given leg index.
+    """
+    flat = {}
+    for key_name, path in mapping.items():
+        flat[key_name] = extract_nested_value(trade, path, context={"leg": leg_index})
+    return flat
+
+def flatten_trade_with_mapping(trade, mapping):
+    legs = trade.get("orderLegCollection", [])
+    results = []
+    for i in range(len(legs)):
+        flat = extract_and_append(trade, mapping, i)
+        flat["multi_leg"] = len(legs) > 1
+        results.append(flat)
+    return results
+
+def flatten_data(trade):
+    flat_trade = {}
+
+    mapping = {
+        "symbol": ["orderLegCollection", "{leg}", "instrument", "symbol"],
+        "underlying": ["orderLegCollection", "{leg}", "instrument", "underlyingSymbol"],
+        "instruction": ["orderLegCollection", "{leg}", "instruction"],
+        "qty": ["orderLegCollection", "{leg}", "quantity"],
+        "price": ["orderActivityCollection", 0, "executionLegs", "{leg}", "price"],
+        "order_id": ["orderId"],
+        "time": ["orderActivityCollection", 0, "executionLegs", "{leg}", "time"],
+    }
+
+    flat_trade = flatten_trade_with_mapping(trade, mapping)
+    print(flat_trade)
+
+
+def flatten_dataset(json_data):
+    for trade in json_data:
+        flatten_data(trade)
 
 if __name__ == '__main__':
     file_path = ".env"
@@ -105,5 +164,12 @@ if __name__ == '__main__':
     app_secret = get_secret("SCHWAB_APP_SECRET", file_path)
     client = SchwabClient(app_key, app_secret)
 
+
     data = get_last_week_trades(client)
-    print(data)
+    flatten_dataset(data)
+    if data:
+        with open("schwab_trades.json", "w") as f:
+            json.dump(data, f, indent=2)
+        logging.info("Trade data exported to schwab_trades.json")
+    else:
+        logging.warning("No data returned to export.")
