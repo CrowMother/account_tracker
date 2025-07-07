@@ -96,7 +96,7 @@ def get_secret(key, path="./"):
         logging.error(f"Error getting secret from {path}: {e}")
         return None
 
-def get_last_week_trades(client, status= "FILLED", delta = 24):
+def get_last_week_trades(client, status= "FILLED", delta = 168):
     json_data = client.get_account_positions(status, delta)
     return json_data
 
@@ -124,8 +124,8 @@ def extract_and_append(trade, mapping, leg_index):
     where "{leg}" placeholders are substituted with the given leg index.
     """
     flat = {}
-    for key_name, path in mapping.items():
-        flat[key_name] = extract_nested_value(trade, path, context={"leg": leg_index})
+    for key, path in mapping.items():
+        flat[key] = extract_nested_value(trade, path, context={"leg": leg_index})
     return flat
 
 def flatten_trade_with_mapping(trade, mapping):
@@ -151,12 +151,15 @@ def flatten_data(trade):
     }
 
     flat_trade = flatten_trade_with_mapping(trade, mapping)
-    print(flat_trade)
+    return flat_trade
 
 
 def flatten_dataset(json_data):
+    flat_trades_list = []
     for trade in json_data:
-        flatten_data(trade)
+        flat_legs = flatten_data(trade)
+        flat_trades_list.extend(flat_legs)  # Use extend, not append
+    return flat_trades_list
 
 if __name__ == '__main__':
     file_path = ".env"
@@ -164,12 +167,12 @@ if __name__ == '__main__':
     app_secret = get_secret("SCHWAB_APP_SECRET", file_path)
     client = SchwabClient(app_key, app_secret)
 
-
     data = get_last_week_trades(client)
-    flatten_dataset(data)
-    if data:
+    flattened = flatten_dataset(data)
+    if flattened:
         with open("schwab_trades.json", "w") as f:
-            json.dump(data, f, indent=2)
+            json.dump(flattened, f, indent=2)
         logging.info("Trade data exported to schwab_trades.json")
     else:
-        logging.warning("No data returned to export.")
+        logging.warning("No flattened data to export.")
+
