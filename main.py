@@ -169,10 +169,9 @@ if __name__ == '__main__':
 
     data = get_last_week_trades(client)
     flattened = flatten_dataset(data)
-    if flattened:
-        with open("schwab_trades.json", "w") as f:
-            json.dump(flattened, f, indent=2)
-        logging.info("Trade data exported to schwab_trades.json")
-    else:
+
+    if not flattened:
         logging.warning("No flattened data to export.")
+
+    logging.info("Trade data exported to schwab_trades.json")
 
