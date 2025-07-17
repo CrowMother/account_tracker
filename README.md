@@ -9,6 +9,7 @@ Provide the following variables either in your shell environment or in a `.env` 
 - `SCHWAB_APP_KEY` – your Schwab API application key
 - `SCHWAB_APP_SECRET` – your Schwab API application secret
 - `POLL_INTERVAL` – (optional) seconds between API polls, default `5`
+- `DISCORD_WEBHOOK_URL` – (optional) Discord webhook URL to send trade updates
 
 ## Installation
 
@@ -47,3 +48,29 @@ The flattened data is a list of JSON objects. Each object contains keys similar 
 ```
 
 These objects can be written to a file or further processed as needed.
+
+### Trade Messages
+
+Each flattened trade is formatted into a short string before being sent to
+Discord (if `DISCORD_WEBHOOK_URL` is configured). The default template is:
+
+```
+Contract {ticker} change {pct_change:.2f}%
+```
+
+The template accepts any keys from the flattened trade dictionary, plus the
+calculated `pct_change` from the `PriceTracker`. For instance, a more detailed
+template could look like:
+
+```
+{ticker} {price} {strike} {open_close} {pct_change}
+```
+
+Which might produce an output similar to:
+
+```
+AAPL 175.00 170C OPEN 0.50%
+```
+
+To use a custom template, pass it to `poll_schwab()` or modify the call in
+`main.py`.
