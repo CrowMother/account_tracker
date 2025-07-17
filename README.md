@@ -8,6 +8,7 @@ Provide the following variables either in your shell environment or in a `.env` 
 
 - `SCHWAB_APP_KEY` – your Schwab API application key
 - `SCHWAB_APP_SECRET` – your Schwab API application secret
+- `POLL_INTERVAL` – (optional) seconds between API polls, default `5`
 
 ## Installation
 
@@ -26,7 +27,7 @@ With the environment variables configured, execute:
 python main.py
 ```
 
-The script requests your recent trades, flattens the nested data and logs a message when processing completes.
+The script continuously polls Schwab for account positions using the interval set in `POLL_INTERVAL` (default `5` seconds) and logs results until stopped with `Ctrl+C`.
 
 ### Output Format
 

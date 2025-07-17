@@ -39,7 +39,10 @@ def retry_request(
         except retry_on as e:
             last_exc = e
             logging.warning(
-                f"[Attempt {attempt}] Request failed: {e}. Retrying in {delay}s..."
+                "[Attempt %s] Request failed: %s. Retrying in %ss...",
+                attempt,
+                e,
+                delay,
             )
             time.sleep(delay)
             delay *= backoff
@@ -61,10 +64,18 @@ class SchwabClient:
         def fetch_orders():
             from_date_str = get_start_time(hours)
             to_date_str = get_end_time()
-            return self.client.account_orders_all(from_date_str, to_date_str, None, status)
+            return self.client.account_orders_all(
+                from_date_str,
+                to_date_str,
+                None,
+                status,
+            )
 
         response = retry_request(fetch_orders, raise_on_fail=True)
         if response is not None and response.status_code == 200:
             return response.json()
-        logging.error(f"Failed to get account positions after retries. Response: {response}")
+        logging.error(
+            "Failed to get account positions after retries. Response: %s",
+            response,
+        )
         return None

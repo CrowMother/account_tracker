@@ -1,10 +1,11 @@
-import json
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from flatten import flatten_data, flatten_dataset
+import json  # noqa: E402
+
+from flatten import flatten_data, flatten_dataset  # noqa: E402
 
 FIXTURE = Path(__file__).parent / "fixtures" / "sample_orders.json"
 

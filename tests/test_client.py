@@ -1,12 +1,14 @@
-from unittest.mock import Mock, patch
 import sys
 from pathlib import Path
-import requests
+from unittest.mock import Mock, patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+import requests  # noqa: E402
+
 sys.modules.setdefault("schwabdev", Mock())
 
-from client import SchwabClient
+from client import SchwabClient  # noqa: E402
 
 
 @patch('client.create_schwab_client')

@@ -18,7 +18,11 @@ def extract_and_append(trade, mapping, leg_index):
     """Build a flat dictionary using mapping rules and leg index."""
     flat = {}
     for key, path in mapping.items():
-        flat[key] = extract_nested_value(trade, path, context={"leg": leg_index})
+        flat[key] = extract_nested_value(
+            trade,
+            path,
+            context={"leg": leg_index},
+        )
     return flat
 
 
@@ -34,13 +38,35 @@ def flatten_trade_with_mapping(trade, mapping):
 
 def flatten_data(trade):
     mapping = {
-        "symbol": ["orderLegCollection", "{leg}", "instrument", "symbol"],
-        "underlying": ["orderLegCollection", "{leg}", "instrument", "underlyingSymbol"],
+        "symbol": [
+            "orderLegCollection",
+            "{leg}",
+            "instrument",
+            "symbol",
+        ],
+        "underlying": [
+            "orderLegCollection",
+            "{leg}",
+            "instrument",
+            "underlyingSymbol",
+        ],
         "instruction": ["orderLegCollection", "{leg}", "instruction"],
         "qty": ["orderLegCollection", "{leg}", "quantity"],
-        "price": ["orderActivityCollection", 0, "executionLegs", "{leg}", "price"],
+        "price": [
+            "orderActivityCollection",
+            0,
+            "executionLegs",
+            "{leg}",
+            "price",
+        ],
         "order_id": ["orderId"],
-        "time": ["orderActivityCollection", 0, "executionLegs", "{leg}", "time"],
+        "time": [
+            "orderActivityCollection",
+            0,
+            "executionLegs",
+            "{leg}",
+            "time",
+        ],
     }
     return flatten_trade_with_mapping(trade, mapping)
 
