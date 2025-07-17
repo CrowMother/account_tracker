@@ -20,6 +20,37 @@ Provide the following variables either in your shell environment or in a `.env` 
    pip install -e .
    ```
 
+## Docker
+
+Build the container from the project root:
+
+```bash
+docker build -t account-tracker .
+```
+
+Set the following variables when running the container:
+
+- `SCHWAB_APP_KEY`
+- `SCHWAB_APP_SECRET`
+- `POLL_INTERVAL` – (optional)
+- `DISCORD_WEBHOOK_URL` – (optional)
+
+Run the container with your credentials:
+
+```bash
+docker run -e SCHWAB_APP_KEY=$SCHWAB_APP_KEY \
+           -e SCHWAB_APP_SECRET=$SCHWAB_APP_SECRET \
+           account-tracker
+```
+
+To reuse a local `.env` file or persist `tokens.json`, mount them into the container:
+
+```bash
+docker run --env-file .env \
+           -v $(pwd)/tokens.json:/app/tokens.json \
+           account-tracker
+```
+
 ## Running
 
 With the environment variables configured, execute:
