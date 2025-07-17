@@ -11,15 +11,16 @@ def create_schwab_client(key: str, secret: str):
     return schwabdev.Client(key, secret)
 
 
-def _get_end_time(delta: int = 1) -> str:
-    to_date = datetime.now(timezone.utc)
-    from_date = to_date - timedelta(hours=delta)
-    return from_date.strftime('%Y-%m-%dT%H:%M:%S.000Z')
+def get_start_time(delta_hours: int = 1) -> str:
+    """Return the UTC ISO timestamp ``delta_hours`` hours ago."""
+    start = datetime.now(timezone.utc) - timedelta(hours=delta_hours)
+    return start.strftime("%Y-%m-%dT%H:%M:%S.000Z")
 
 
-def _get_start_time(delta: int = 1) -> str:
-    to_date = datetime.now(timezone.utc)
-    return to_date.strftime('%Y-%m-%dT%H:%M:%S.000Z')
+def get_end_time() -> str:
+    """Return the current time as a UTC ISO timestamp."""
+    end = datetime.now(timezone.utc)
+    return end.strftime("%Y-%m-%dT%H:%M:%S.000Z")
 
 
 def retry_request(
@@ -55,9 +56,11 @@ class SchwabClient:
         self.client = create_schwab_client(key, secret)
 
     def get_account_positions(self, status: str | None = None, hours: int = 1):
+        """Return account orders between ``hours`` ago and now."""
+
         def fetch_orders():
-            to_date_str = _get_start_time(hours)
-            from_date_str = _get_end_time(hours)
+            from_date_str = get_start_time(hours)
+            to_date_str = get_end_time()
             return self.client.account_orders_all(from_date_str, to_date_str, None, status)
 
         response = retry_request(fetch_orders, raise_on_fail=True)
