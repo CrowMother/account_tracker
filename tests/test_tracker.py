@@ -3,7 +3,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from tracker import PriceTracker
+from tracker import PriceTracker  # noqa: E402
 
 
 def test_update_and_get_change():

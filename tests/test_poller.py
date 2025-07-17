@@ -10,10 +10,12 @@ from poller import poll_schwab  # noqa: E402
 from tracker import PriceTracker  # noqa: E402
 
 
-def test_poll_schwab_calls_client_once():
+def test_poll_schwab_calls_client_once(monkeypatch):
     client = Mock()
 
     async def run_poll():
+        monkeypatch.setattr("poller.flatten_dataset", lambda data: [])
+        monkeypatch.setattr("poller.send_message", lambda msg: None)
         task = asyncio.create_task(poll_schwab(client, interval_secs=0))
         await asyncio.sleep(0.01)
         task.cancel()
@@ -39,8 +41,16 @@ def test_poll_schwab_tracks_changes(monkeypatch):
             return [{"symbol": "AAPL", "price": 100.0}]
 
         monkeypatch.setattr("poller.flatten_dataset", fake_flatten)
+        sent = []
 
-        task = asyncio.create_task(poll_schwab(client, interval_secs=0, tracker=tracker))
+        monkeypatch.setattr(
+            "poller.send_message",
+            lambda msg: sent.append(msg),
+        )
+
+        task = asyncio.create_task(
+            poll_schwab(client, interval_secs=0, tracker=tracker)
+        )
         await asyncio.sleep(0.01)
         task.cancel()
         try:
@@ -48,6 +58,8 @@ def test_poll_schwab_tracks_changes(monkeypatch):
         except asyncio.CancelledError:
             pass
         recorded.append(tracker.last_prices["AAPL"])
+        return sent[0]
 
-    asyncio.run(run_poll())
+    message = asyncio.run(run_poll())
     assert recorded == [100.0]
+    assert message.startswith("Contract AAPL change")

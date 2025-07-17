@@ -4,12 +4,15 @@ import logging
 from client import SchwabClient
 from flatten import flatten_dataset
 from tracker import PriceTracker
+from discord_client import send_message
+from messaging import format_trade
 
 
 async def poll_schwab(
     client: SchwabClient,
     interval_secs: float = 5,
     tracker: PriceTracker | None = None,
+    template: str = "Contract {ticker} change {pct_change:.2f}%",
 ) -> None:
     """Continuously poll ``client`` for account positions.
 
@@ -28,7 +31,16 @@ async def poll_schwab(
                     price = trade.get("price")
                     if symbol is None or price is None:
                         continue
-                    change = tracker.update_and_get_change(symbol, float(price))
+                    change = tracker.update_and_get_change(
+                        symbol, float(price)
+                    )
+                    message = format_trade(
+                        template,
+                        ticker=symbol,
+                        pct_change=change,
+                        **trade,
+                    )
+                    send_message(message)
                     logging.info(
                         "Contract %s change %.2f%%", symbol, change
                     )
@@ -38,4 +50,3 @@ async def poll_schwab(
             await asyncio.sleep(interval_secs)
         except asyncio.CancelledError:
             break
-

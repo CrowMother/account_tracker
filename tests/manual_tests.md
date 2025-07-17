@@ -17,3 +17,6 @@
 4. **Price Tracking**
    - Run the poller with sample trades and verify that price changes are logged
      correctly for each contract.
+5. **Discord Notifications**
+   - Set `DISCORD_WEBHOOK_URL` to a test webhook and run the poller.
+   - Confirm messages are sent with the configured template.
