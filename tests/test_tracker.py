@@ -12,3 +12,10 @@ def test_update_and_get_change():
     second = tracker.update_and_get_change("AAPL", 110.0)
     assert first == 0.0
     assert round(second, 2) == 10.0
+
+
+def test_update_and_get_change_zero_previous():
+    tracker = PriceTracker()
+    tracker.update_and_get_change("AAPL", 0.0)
+    change = tracker.update_and_get_change("AAPL", 10.0)
+    assert change == 0.0

@@ -63,3 +63,37 @@ def test_poll_schwab_tracks_changes(monkeypatch):
     message = asyncio.run(run_poll())
     assert recorded == [100.0]
     assert message.startswith("Contract AAPL change")
+
+
+def test_poll_schwab_custom_template(monkeypatch):
+    client = Mock()
+    client.get_account_positions.return_value = ["dummy"]
+
+    async def run_poll():
+        class DummyTracker:
+            def update_and_get_change(self, contract, price):
+                return 5.5
+
+        monkeypatch.setattr(
+            "poller.flatten_dataset", lambda data: [{"symbol": "AAPL", "price": 1.0}]
+        )
+        sent = []
+        monkeypatch.setattr("poller.send_message", lambda msg: sent.append(msg))
+        task = asyncio.create_task(
+            poll_schwab(
+                client,
+                interval_secs=0,
+                tracker=DummyTracker(),
+                template="Stock {ticker} {pct_change:.2f}%",
+            )
+        )
+        await asyncio.sleep(0.01)
+        task.cancel()
+        try:
+            await task
+        except asyncio.CancelledError:
+            pass
+        return sent[0]
+
+    message = asyncio.run(run_poll())
+    assert message == "Stock AAPL 5.50%"
