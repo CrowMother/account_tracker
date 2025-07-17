@@ -4,7 +4,7 @@ import os
 import signal
 
 from client import SchwabClient
-from secrets import get_secret
+from my_secrets import get_secret
 from poller import poll_schwab
 from tracker import PriceTracker
 
