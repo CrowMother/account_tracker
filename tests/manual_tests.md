@@ -20,3 +20,16 @@
 5. **Discord Notifications**
    - Set `DISCORD_WEBHOOK_URL` to a test webhook and run the poller.
    - Confirm messages are sent with the configured template.
+
+## Docker Usage
+
+1. **Build the Docker image**
+   - Run `docker build -t account-tracker .` from the project root.
+   - Ensure the build completes without errors.
+
+2. **Run container with minimal variables**
+   - Execute `docker run -e SCHWAB_APP_KEY=your_key -e SCHWAB_APP_SECRET=your_secret account-tracker`.
+   - The container should start and begin polling.
+
+3. **Validate startup logs**
+   - Check `docker logs` for lines starting with `Contract` which indicate polling has begun.
