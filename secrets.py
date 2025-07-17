@@ -4,8 +4,14 @@ from dotenv import load_dotenv
 
 
 def get_secret(key: str, path: str = "./"):
-    """Load a single secret from the given dotenv path."""
+    """Load a single secret from the environment or an optional dotenv file."""
+    # Check existing environment variables first
+    value = os.getenv(key)
+    if value is not None:
+        return value
+
     try:
+        # Fallback to loading from the provided dotenv path
         load_dotenv(path)
         value = os.getenv(key)
         if value is None:

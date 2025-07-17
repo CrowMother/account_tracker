@@ -75,10 +75,14 @@ def test_poll_schwab_custom_template(monkeypatch):
                 return 5.5
 
         monkeypatch.setattr(
-            "poller.flatten_dataset", lambda data: [{"symbol": "AAPL", "price": 1.0}]
+            "poller.flatten_dataset",
+            lambda data: [{"symbol": "AAPL", "price": 1.0}],
         )
         sent = []
-        monkeypatch.setattr("poller.send_message", lambda msg: sent.append(msg))
+        monkeypatch.setattr(
+            "poller.send_message",
+            lambda msg: sent.append(msg),
+        )
         task = asyncio.create_task(
             poll_schwab(
                 client,
