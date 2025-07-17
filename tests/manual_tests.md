@@ -13,3 +13,7 @@
 3. **API Rate Limiting**
    - Simulate repeated polling causing rate limit errors.
    - Ensure the poller logs retry attempts and continues running.
+
+4. **Price Tracking**
+   - Run the poller with sample trades and verify that price changes are logged
+     correctly for each contract.
