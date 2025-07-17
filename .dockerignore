@@ -1,0 +1,7 @@
+.git
+tests/
+.env
+tokens.json
+__pycache__/
+.venv/
+.idea/
