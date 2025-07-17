@@ -7,3 +7,6 @@ dependencies = [
     "python-dotenv>=1.1.0",
     "schwabdev>=2.5.0",
 ]
+
+[project.scripts]
+account-tracker = "main:main"
