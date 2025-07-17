@@ -10,3 +10,8 @@ dependencies = [
 
 [project.scripts]
 account-tracker = "main:main"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0"
+]

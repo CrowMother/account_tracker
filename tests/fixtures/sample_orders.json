@@ -1,0 +1,42 @@
+[
+  {
+    "orderId": 1,
+    "orderLegCollection": [
+      {
+        "instrument": {"symbol": "AAPL", "underlyingSymbol": "AAPL"},
+        "instruction": "BUY",
+        "quantity": 10
+      }
+    ],
+    "orderActivityCollection": [
+      {
+        "executionLegs": [
+          {"price": 100.0, "time": "2024-01-01T00:00:00.000Z"}
+        ]
+      }
+    ]
+  },
+  {
+    "orderId": 2,
+    "orderLegCollection": [
+      {
+        "instrument": {"symbol": "MSFT", "underlyingSymbol": "MSFT"},
+        "instruction": "SELL",
+        "quantity": 5
+      },
+      {
+        "instrument": {"symbol": "MSFT", "underlyingSymbol": "MSFT"},
+        "instruction": "BUY",
+        "quantity": 5
+      }
+    ],
+    "orderActivityCollection": [
+      {
+        "executionLegs": [
+          {"price": 200.0, "time": "2024-01-02T00:00:00.000Z"},
+          {"price": 201.0, "time": "2024-01-02T00:00:00.000Z"}
+        ]
+      }
+    ]
+  }
+]
