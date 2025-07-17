@@ -1,14 +1,20 @@
+import asyncio
 import logging
+import os
+import signal
+
 from client import SchwabClient
 from secrets import get_secret
-from flatten import flatten_dataset
+from poller import poll_schwab
 
 
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 
-def get_last_week_trades(client: SchwabClient, status: str = "FILLED", delta: int = 168):
+def get_last_week_trades(
+    client: SchwabClient, status: str = "FILLED", delta: int = 168
+) -> list | None:
     return client.get_account_positions(status, delta)
 
 
@@ -18,13 +24,22 @@ def main():
     app_secret = get_secret("SCHWAB_APP_SECRET", file_path)
     client = SchwabClient(app_key, app_secret)
 
-    data = get_last_week_trades(client)
-    flattened = flatten_dataset(data)
+    interval = float(os.getenv("POLL_INTERVAL", 5))
+    loop = asyncio.get_event_loop()
+    task = loop.create_task(poll_schwab(client, interval))
 
-    if not flattened:
-        logging.warning("No flattened data to export.")
+    for sig in (signal.SIGINT, signal.SIGTERM):
+        loop.add_signal_handler(sig, task.cancel)
 
-    logging.info("Trade data exported to schwab_trades.json")
+    try:
+        loop.run_until_complete(task)
+    except KeyboardInterrupt:
+        task.cancel()
+        loop.run_until_complete(task)
+    except asyncio.CancelledError:
+        pass
+    finally:
+        logging.info("Polling stopped")
 
 
 if __name__ == "__main__":
