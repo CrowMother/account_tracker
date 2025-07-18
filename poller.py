@@ -35,6 +35,8 @@ async def poll_schwab(
                     price = trade.get("price")
                     qty = trade.get("qty")
                     side = trade.get("instruction")
+                    expiration = trade.get("expiration")
+                    strike = trade.get("strike")
                     if symbol is None or price is None:
                         continue
                     change = tracker.update_and_get_change(
@@ -43,12 +45,21 @@ async def poll_schwab(
                     if qty is not None and side is not None:
                         try:
                             position_tracker.add_trade(
-                                symbol, float(qty), float(price), side
+                                symbol,
+                                float(qty),
+                                float(price),
+                                side,
+                                expiration,
+                                strike,
                             )
                         except ValueError as exc:  # pragma: no cover
                             logging.error("Position tracking error: %s", exc)
-                    open_qty = position_tracker.get_open_quantity(symbol)
-                    pnl = position_tracker.calculate_pnl(symbol)
+                    open_qty = position_tracker.get_open_quantity(
+                        symbol, expiration, strike
+                    )
+                    pnl = position_tracker.calculate_pnl(
+                        symbol, expiration, strike
+                    )
                     message = format_trade(
                         template,
                         ticker=symbol,

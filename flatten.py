@@ -59,6 +59,18 @@ def flatten_data(trade):
             "{leg}",
             "price",
         ],
+        "expiration": [
+            "orderLegCollection",
+            "{leg}",
+            "instrument",
+            "maturityDate",
+        ],
+        "strike": [
+            "orderLegCollection",
+            "{leg}",
+            "instrument",
+            "strikePrice",
+        ],
         "order_id": ["orderId"],
         "time": [
             "orderActivityCollection",
