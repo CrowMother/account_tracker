@@ -38,7 +38,14 @@ def test_poll_schwab_tracks_changes(monkeypatch):
         tracker = PriceTracker()
 
         def fake_flatten(data):
-            return [{"symbol": "AAPL", "price": 100.0}]
+            return [
+                {
+                    "symbol": "AAPL",
+                    "price": 100.0,
+                    "expiration": "2024-01-19",
+                    "strike": 170.0,
+                }
+            ]
 
         monkeypatch.setattr("poller.flatten_dataset", fake_flatten)
         sent = []
@@ -119,6 +126,8 @@ def test_poll_schwab_updates_position_tracker(monkeypatch):
                     "price": 100.0,
                     "qty": 1,
                     "instruction": "BUY",
+                    "expiration": "2024-01-19",
+                    "strike": 170.0,
                 }
             ]
 
@@ -142,7 +151,9 @@ def test_poll_schwab_updates_position_tracker(monkeypatch):
 
     asyncio.run(run_poll())
     assert position.add_trade.call_count >= 1
-    position.add_trade.assert_any_call("AAPL", 1.0, 100.0, "BUY")
+    position.add_trade.assert_any_call(
+        "AAPL", 1.0, 100.0, "BUY", "2024-01-19", 170.0
+    )
 
 
 def test_poll_schwab_logs_position_data(monkeypatch, caplog):
@@ -159,6 +170,8 @@ def test_poll_schwab_logs_position_data(monkeypatch, caplog):
                     "price": 100.0,
                     "qty": 1,
                     "instruction": "BUY",
+                    "expiration": "2024-01-19",
+                    "strike": 170.0,
                 }
             ]
 
@@ -194,6 +207,8 @@ def test_poll_schwab_template_includes_position(monkeypatch):
                     "price": 100.0,
                     "qty": 1,
                     "instruction": "BUY",
+                    "expiration": "2024-01-19",
+                    "strike": 170.0,
                 }
             ]
 

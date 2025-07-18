@@ -3,7 +3,12 @@
     "orderId": 1,
     "orderLegCollection": [
       {
-        "instrument": {"symbol": "AAPL", "underlyingSymbol": "AAPL"},
+        "instrument": {
+          "symbol": "AAPL",
+          "underlyingSymbol": "AAPL",
+          "maturityDate": "2024-01-19",
+          "strikePrice": 170.0
+        },
         "instruction": "BUY",
         "quantity": 10
       }
@@ -20,12 +25,22 @@
     "orderId": 2,
     "orderLegCollection": [
       {
-        "instrument": {"symbol": "MSFT", "underlyingSymbol": "MSFT"},
+        "instrument": {
+          "symbol": "MSFT",
+          "underlyingSymbol": "MSFT",
+          "maturityDate": "2024-02-16",
+          "strikePrice": 260.0
+        },
         "instruction": "SELL",
         "quantity": 5
       },
       {
-        "instrument": {"symbol": "MSFT", "underlyingSymbol": "MSFT"},
+        "instrument": {
+          "symbol": "MSFT",
+          "underlyingSymbol": "MSFT",
+          "maturityDate": "2024-02-16",
+          "strikePrice": 260.0
+        },
         "instruction": "BUY",
         "quantity": 5
       }

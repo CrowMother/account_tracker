@@ -21,6 +21,8 @@ def test_flatten_data_single():
         "instruction": "BUY",
         "qty": 10,
         "price": 100.0,
+        "expiration": "2024-01-19",
+        "strike": 170.0,
         "order_id": 1,
         "time": "2024-01-01T00:00:00.000Z",
         "multi_leg": False
@@ -37,6 +39,8 @@ def test_flatten_dataset_full():
             "instruction": "BUY",
             "qty": 10,
             "price": 100.0,
+            "expiration": "2024-01-19",
+            "strike": 170.0,
             "order_id": 1,
             "time": "2024-01-01T00:00:00.000Z",
             "multi_leg": False
@@ -47,6 +51,8 @@ def test_flatten_dataset_full():
             "instruction": "SELL",
             "qty": 5,
             "price": 200.0,
+            "expiration": "2024-02-16",
+            "strike": 260.0,
             "order_id": 2,
             "time": "2024-01-02T00:00:00.000Z",
             "multi_leg": True
@@ -57,6 +63,8 @@ def test_flatten_dataset_full():
             "instruction": "BUY",
             "qty": 5,
             "price": 201.0,
+            "expiration": "2024-02-16",
+            "strike": 260.0,
             "order_id": 2,
             "time": "2024-01-02T00:00:00.000Z",
             "multi_leg": True
