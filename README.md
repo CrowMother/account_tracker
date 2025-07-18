@@ -13,7 +13,7 @@ Provide the following variables either in your shell environment or in a `.env` 
 
 ## Installation
 
-1. Ensure Python 3.12 or newer is available.
+1. Ensure Python 3.11 or newer is available.
 2. (Optional) Create and activate a virtual environment.
 3. Install the dependencies defined in `pyproject.toml`:
    ```bash
