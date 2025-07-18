@@ -24,6 +24,14 @@
    - Execute a sequence of buy and sell trades.
    - Verify that open quantities and realized PnL are updated according to FIFO logic.
    - Observe the log output for open contract count and win/loss percentage after each trade.
+7. **Partial Close Handling**
+   - Buy 10 contracts of a symbol and then buy another 10 at a different price.
+   - Sell 15 contracts and confirm the open quantity is reduced to 5.
+   - Check that the first lot is closed entirely and that PnL is calculated using its purchase price plus part of the second lot.
+8. **FIFO P/L Calculation**
+   - Sell the remaining 5 contracts at a third price.
+   - The open quantity should return to zero.
+   - Verify the win/loss percentage equals total realized profit divided by the cost basis of the closed lots.
 
 ## Docker Usage
 

@@ -108,5 +108,18 @@ percentages using a FIFO cost basis. These values are available as
 `open_qty` and `pnl` placeholders in the message template. They are also logged
 each time a trade is processed.
 
+### How ``open_qty`` and ``pnl`` are calculated
+
+1. **Tracking open quantity** – Every buy order adds a lot of ``qty`` at the
+   execution price to an internal queue for that symbol. Sell orders remove
+   quantity from this queue starting with the earliest lot, leaving any remainder
+   in place. This allows partial closes to be handled correctly.
+2. **Realized profit/loss** – When quantity from a lot is closed, the
+   difference between the sell price and that lot's purchase price is recorded.
+   The cumulative realized profit is divided by the total cost basis of all
+   closed lots to produce the ``pnl`` percentage.
+3. **Current open quantity** – ``open_qty`` is simply the sum of the remaining
+   quantities in the queue for the symbol.
+
 To use a custom template, pass it to `poll_schwab()` or modify the call in
 `main.py`.
