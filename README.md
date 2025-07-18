@@ -103,5 +103,10 @@ Which might produce an output similar to:
 AAPL 175.00 170C OPEN 0.50%
 ```
 
+The poller also maintains open contract counts and realized win/loss
+percentages using a FIFO cost basis. These values are available as
+`open_qty` and `pnl` placeholders in the message template. They are also logged
+each time a trade is processed.
+
 To use a custom template, pass it to `poll_schwab()` or modify the call in
 `main.py`.

@@ -18,7 +18,8 @@ async def poll_schwab(
 ) -> None:
     """Continuously poll ``client`` for account positions.
 
-    Each fetched trade is flattened, fed into ``tracker`` and the percent
+    Each fetched trade is flattened, fed into ``tracker`` and
+    ``position_tracker`` to compute open quantity and realized PnL. The percent
     change from the previous price is logged.
     """
     tracker = tracker or PriceTracker()
@@ -41,18 +42,28 @@ async def poll_schwab(
                     )
                     if qty is not None and side is not None:
                         try:
-                            position_tracker.add_trade(symbol, float(qty), float(price), side)
-                        except ValueError as exc:  # pragma: no cover - logging only
+                            position_tracker.add_trade(
+                                symbol, float(qty), float(price), side
+                            )
+                        except ValueError as exc:  # pragma: no cover
                             logging.error("Position tracking error: %s", exc)
+                    open_qty = position_tracker.get_open_quantity(symbol)
+                    pnl = position_tracker.calculate_pnl(symbol)
                     message = format_trade(
                         template,
                         ticker=symbol,
                         pct_change=change,
+                        open_qty=open_qty,
+                        pnl=pnl,
                         **trade,
                     )
                     send_message(message)
                     logging.info(
-                        "Contract %s change %.2f%%", symbol, change
+                        "Contract %s change %.2f%% open %s PnL %.2f%%",
+                        symbol,
+                        change,
+                        open_qty,
+                        pnl,
                     )
         except Exception as exc:  # pragma: no cover - logging only
             logging.error("Polling error: %s", exc)
