@@ -7,6 +7,7 @@ from client import SchwabClient
 from my_secrets import get_secret
 from poller import poll_schwab
 from tracker import PriceTracker
+from position_tracker import PositionTracker
 
 
 logging.basicConfig(level=logging.DEBUG,
@@ -25,10 +26,13 @@ def main():
     app_secret = get_secret("SCHWAB_APP_SECRET", file_path)
     client = SchwabClient(app_key, app_secret)
     tracker = PriceTracker()
+    position_tracker = PositionTracker()
 
     interval = float(os.getenv("POLL_INTERVAL", 5))
     loop = asyncio.get_event_loop()
-    task = loop.create_task(poll_schwab(client, interval, tracker))
+    task = loop.create_task(
+        poll_schwab(client, interval, tracker, position_tracker)
+    )
 
     for sig in (signal.SIGINT, signal.SIGTERM):
         loop.add_signal_handler(sig, task.cancel)

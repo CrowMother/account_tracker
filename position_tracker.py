@@ -9,7 +9,9 @@ class PositionTracker:
         # total cost basis for closed lots per symbol
         self.closed_basis: dict[str, float] = {}
 
-    def add_trade(self, symbol: str, qty: float, price: float, side: str) -> None:
+    def add_trade(
+        self, symbol: str, qty: float, price: float, side: str
+    ) -> None:
         """Record a trade and update FIFO positions.
 
         Parameters
@@ -36,15 +38,22 @@ class PositionTracker:
         qty_remaining = float(qty)
         while qty_remaining > 0:
             if not queue:
-                raise ValueError(f"Attempting to sell more than open quantity for {symbol}")
+                raise ValueError(
+                    f"Attempting to sell more than open quantity for {symbol}"
+                )
             lot = queue[0]
             close_qty = min(qty_remaining, lot["qty"])
             lot["qty"] -= close_qty
             if lot["qty"] == 0:
                 queue.pop(0)
             pnl = (price - lot["price"]) * close_qty
-            self.realized_pnl[symbol] = self.realized_pnl.get(symbol, 0.0) + pnl
-            self.closed_basis[symbol] = self.closed_basis.get(symbol, 0.0) + lot["price"] * close_qty
+            self.realized_pnl[symbol] = (
+                self.realized_pnl.get(symbol, 0.0) + pnl
+            )
+            self.closed_basis[symbol] = (
+                self.closed_basis.get(symbol, 0.0)
+                + lot["price"] * close_qty
+            )
             qty_remaining -= close_qty
 
     def get_open_quantity(self, symbol: str) -> float:

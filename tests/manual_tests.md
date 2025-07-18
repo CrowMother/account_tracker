@@ -23,6 +23,7 @@
 6. **Position Tracking**
    - Execute a sequence of buy and sell trades.
    - Verify that open quantities and realized PnL are updated according to FIFO logic.
+   - Observe the log output for open contract count and win/loss percentage after each trade.
 
 ## Docker Usage
 
