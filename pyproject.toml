@@ -28,6 +28,7 @@ py-modules = [
     "poller",
     "secrets",
     "tracker",
+    "position_tracker",
 ]
 
 [build-system]

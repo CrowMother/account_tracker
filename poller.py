@@ -4,6 +4,7 @@ import logging
 from client import SchwabClient
 from flatten import flatten_dataset
 from tracker import PriceTracker
+from position_tracker import PositionTracker
 from discord_client import send_message
 from messaging import format_trade
 
@@ -12,6 +13,7 @@ async def poll_schwab(
     client: SchwabClient,
     interval_secs: float = 5,
     tracker: PriceTracker | None = None,
+    position_tracker: PositionTracker | None = None,
     template: str = "Contract {ticker} change {pct_change:.2f}%",
 ) -> None:
     """Continuously poll ``client`` for account positions.
@@ -20,6 +22,7 @@ async def poll_schwab(
     change from the previous price is logged.
     """
     tracker = tracker or PriceTracker()
+    position_tracker = position_tracker or PositionTracker()
 
     while True:
         try:
@@ -29,11 +32,18 @@ async def poll_schwab(
                 for trade in trades:
                     symbol = trade.get("symbol")
                     price = trade.get("price")
+                    qty = trade.get("qty")
+                    side = trade.get("instruction")
                     if symbol is None or price is None:
                         continue
                     change = tracker.update_and_get_change(
                         symbol, float(price)
                     )
+                    if qty is not None and side is not None:
+                        try:
+                            position_tracker.add_trade(symbol, float(qty), float(price), side)
+                        except ValueError as exc:  # pragma: no cover - logging only
+                            logging.error("Position tracking error: %s", exc)
                     message = format_trade(
                         template,
                         ticker=symbol,
