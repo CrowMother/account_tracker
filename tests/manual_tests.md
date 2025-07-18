@@ -20,6 +20,9 @@
 5. **Discord Notifications**
    - Set `DISCORD_WEBHOOK_URL` to a test webhook and run the poller.
    - Confirm messages are sent with the configured template.
+6. **Position Tracking**
+   - Execute a sequence of buy and sell trades.
+   - Verify that open quantities and realized PnL are updated according to FIFO logic.
 
 ## Docker Usage
 
