@@ -9,7 +9,8 @@ Provide the following variables either in your shell environment or in a `.env` 
 - `SCHWAB_APP_KEY` – your Schwab API application key
 - `SCHWAB_APP_SECRET` – your Schwab API application secret
 - `POLL_INTERVAL` – (optional) seconds between API polls, default `5`
-- `DISCORD_WEBHOOK_URL` – (optional) Discord webhook URL to send trade updates
+- `DISCORD_BOT_TOKEN` – (optional) Discord bot token used for notifications
+- `DISCORD_CHANNEL_ID` – (optional) Discord channel ID where messages are sent
 
 ## Installation
 
@@ -33,7 +34,8 @@ Set the following variables when running the container:
 - `SCHWAB_APP_KEY`
 - `SCHWAB_APP_SECRET`
 - `POLL_INTERVAL` – (optional)
-- `DISCORD_WEBHOOK_URL` – (optional)
+- `DISCORD_BOT_TOKEN` – (optional)
+- `DISCORD_CHANNEL_ID` – (optional)
 
 Run the container with your credentials:
 
@@ -83,7 +85,7 @@ These objects can be written to a file or further processed as needed.
 ### Trade Messages
 
 Each flattened trade is formatted into a short string before being sent to
-Discord (if `DISCORD_WEBHOOK_URL` is configured). The default template is:
+Discord (if `DISCORD_BOT_TOKEN` is configured). The default template is:
 
 ```
 Contract {ticker} change {pct_change:.2f}%

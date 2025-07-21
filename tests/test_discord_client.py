@@ -10,17 +10,22 @@ from discord_client import send_message  # noqa: E402
 
 @patch('discord_client.requests.post')
 def test_send_message_posts(mock_post):
-    os.environ['DISCORD_WEBHOOK_URL'] = 'http://localhost/webhook'
+    os.environ['DISCORD_BOT_TOKEN'] = 'abc123'
+    os.environ['DISCORD_CHANNEL_ID'] = '42'
     send_message('hi')
     mock_post.assert_called_once_with(
-        'http://localhost/webhook', json={'content': 'hi'}, timeout=10
+        'https://discord.com/api/v10/channels/42/messages',
+        json={'content': 'hi'},
+        headers={'Authorization': 'Bot abc123'},
+        timeout=10,
     )
 
 
 @patch('discord_client.requests.post')
-def test_send_message_no_url(mock_post, caplog, monkeypatch):
-    monkeypatch.delenv('DISCORD_WEBHOOK_URL', raising=False)
+def test_send_message_missing_vars(mock_post, caplog, monkeypatch):
+    monkeypatch.delenv('DISCORD_BOT_TOKEN', raising=False)
+    monkeypatch.delenv('DISCORD_CHANNEL_ID', raising=False)
     with caplog.at_level('ERROR'):
         send_message('hi')
     mock_post.assert_not_called()
-    assert 'DISCORD_WEBHOOK_URL not set' in caplog.text
+    assert 'DISCORD_BOT_TOKEN or DISCORD_CHANNEL_ID not set' in caplog.text
