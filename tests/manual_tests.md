@@ -18,8 +18,8 @@
    - Run the poller with sample trades and verify that price changes are logged
      correctly for each contract.
 5. **Discord Notifications**
-   - Set `DISCORD_WEBHOOK_URL` to a test webhook and run the poller.
-   - Confirm messages are sent with the configured template.
+   - Set `DISCORD_BOT_TOKEN` and `DISCORD_CHANNEL_ID` in your environment.
+   - Run the poller and confirm messages appear in the channel.
 6. **Position Tracking**
    - Execute a sequence of buy and sell trades.
    - Verify that open quantities and realized PnL are updated according to FIFO logic.

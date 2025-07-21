@@ -237,3 +237,43 @@ def test_poll_schwab_template_includes_position(monkeypatch):
 
     message = asyncio.run(run_poll())
     assert message == "1.0 0.00%"
+
+
+def test_poll_schwab_only_sends_new_trades(monkeypatch):
+    """Ensure duplicate trades are not sent multiple times."""
+    client = Mock()
+    client.get_account_positions.side_effect = [["dummy"], ["dummy"], []]
+
+    async def run_poll():
+        tracker = PriceTracker()
+
+        def fake_flatten(data):
+            return [
+                {
+                    "symbol": "AAPL",
+                    "price": 100.0,
+                    "order_id": 1,
+                    "time": "2024-01-01T00:00:00.000Z",
+                }
+            ]
+
+        monkeypatch.setattr("poller.flatten_dataset", fake_flatten)
+        sent = []
+        monkeypatch.setattr(
+            "poller.send_message",
+            lambda msg: sent.append(msg),
+        )
+
+        task = asyncio.create_task(
+            poll_schwab(client, interval_secs=0, tracker=tracker)
+        )
+        await asyncio.sleep(0.02)
+        task.cancel()
+        try:
+            await task
+        except asyncio.CancelledError:
+            pass
+        return sent
+
+    messages = asyncio.run(run_poll())
+    assert len(messages) == 1
