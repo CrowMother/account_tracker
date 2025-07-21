@@ -15,15 +15,20 @@ async def poll_schwab(
     tracker: PriceTracker | None = None,
     position_tracker: PositionTracker | None = None,
     template: str = "Contract {ticker} change {pct_change:.2f}%",
+    sent_trade_ids: set[
+        tuple[int | None, str | None, str | None]
+    ] | None = None,
 ) -> None:
     """Continuously poll ``client`` for account positions.
 
     Each fetched trade is flattened, fed into ``tracker`` and
     ``position_tracker`` to compute open quantity and realized PnL. The percent
-    change from the previous price is logged.
+    change from the previous price is logged. Trades are only sent to Discord
+    once per process based on their order ID and timestamp.
     """
     tracker = tracker or PriceTracker()
     position_tracker = position_tracker or PositionTracker()
+    sent_trade_ids = sent_trade_ids or set()
 
     while True:
         try:
@@ -68,7 +73,14 @@ async def poll_schwab(
                         pnl=pnl,
                         **trade,
                     )
-                    send_message(message)
+                    trade_id = (
+                        trade.get("order_id"),
+                        trade.get("time"),
+                        symbol,
+                    )
+                    if trade_id not in sent_trade_ids:
+                        sent_trade_ids.add(trade_id)
+                        send_message(message)
                     logging.info(
                         "Contract %s change %.2f%% open %s PnL %.2f%%",
                         symbol,
