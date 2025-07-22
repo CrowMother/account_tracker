@@ -277,3 +277,78 @@ def test_poll_schwab_only_sends_new_trades(monkeypatch):
 
     messages = asyncio.run(run_poll())
     assert len(messages) == 1
+
+
+def test_poll_schwab_status_messages(monkeypatch):
+    client = Mock()
+    client.get_account_positions.side_effect = [["dummy"], []]
+
+    trades = [
+        {
+            "symbol": "AAPL",
+            "price": 100.0,
+            "qty": 2,
+            "instruction": "BUY",
+            "expiration": "2024-01-19",
+            "strike": 170.0,
+            "order_id": 1,
+            "time": "t1",
+        },
+        {
+            "symbol": "AAPL",
+            "price": 110.0,
+            "qty": 1,
+            "instruction": "SELL",
+            "expiration": "2024-01-19",
+            "strike": 170.0,
+            "order_id": 2,
+            "time": "t2",
+        },
+        {
+            "symbol": "AAPL",
+            "price": 120.0,
+            "qty": 1,
+            "instruction": "SELL",
+            "expiration": "2024-01-19",
+            "strike": 170.0,
+            "order_id": 3,
+            "time": "t3",
+        },
+    ]
+
+    async def run_poll():
+        tracker = PriceTracker()
+
+        monkeypatch.setattr("poller.flatten_dataset", lambda data: trades)
+        sent = []
+        monkeypatch.setattr(
+            "poller.send_message", lambda m: sent.append(m)
+        )
+
+        task = asyncio.create_task(
+            poll_schwab(client, interval_secs=0, tracker=tracker)
+        )
+        await asyncio.sleep(0.02)
+        task.cancel()
+        try:
+            await task
+        except asyncio.CancelledError:
+            pass
+        return sent
+
+    messages = asyncio.run(run_poll())
+    expected = [
+        (
+            "Contract AAPL change 0.00% 2024-01-19 170.0 @$100.00 "
+            "Opening \U0001F7E2 0.00%"
+        ),
+        (
+            "Contract AAPL change 10.00% 2024-01-19 170.0 @$110.00 "
+            "Partially Closed \U0001F7E1 10.00%"
+        ),
+        (
+            "Contract AAPL change 9.09% 2024-01-19 170.0 @$120.00 "
+            "Fully Closed \U0001F7E5 20.00%"
+        ),
+    ]
+    assert messages == expected
