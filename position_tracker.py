@@ -15,6 +15,8 @@ class PositionTracker:
         self.realized_pnl: dict[tuple[str, str, float], float] = {}
         # total cost basis for closed lots per key
         self.closed_basis: dict[tuple[str, str, float], float] = {}
+        # average cost of currently open lots per key
+        self.average_cost: dict[tuple[str, str, float], float] = {}
 
     @staticmethod
     def _build_key(
@@ -60,6 +62,7 @@ class PositionTracker:
         queue = self.positions.setdefault(key, [])
         if side == "BUY":
             queue.append({"qty": float(qty), "price": float(price)})
+            self._update_average_cost(key)
             return None
 
         # SELL path - close existing lots using FIFO
@@ -82,6 +85,7 @@ class PositionTracker:
                 self.closed_basis.get(key, 0.0) + lot["price"] * close_qty
             )
             qty_remaining -= close_qty
+        self._update_average_cost(key)
         return trade_pnl
 
     def get_open_quantity(
@@ -107,3 +111,29 @@ class PositionTracker:
         if basis == 0:
             return 0.0
         return self.realized_pnl.get(key, 0.0) / basis * 100
+
+    def _update_average_cost(self, key: tuple[str, str, float]) -> None:
+        """Recalculate and store the average cost for ``key``."""
+        queue = self.positions.get(key, [])
+        total_qty = sum(lot["qty"] for lot in queue)
+        if total_qty:
+            total_cost = sum(lot["qty"] * lot["price"] for lot in queue)
+            self.average_cost[key] = total_cost / total_qty
+        else:
+            self.average_cost[key] = 0.0
+
+    def get_percent_gain(
+        self,
+        symbol: str,
+        expiration: str | None = None,
+        strike: float | None = None,
+        current_price: float | None = None,
+    ) -> float:
+        """Return percent difference between ``current_price`` and open average."""
+        key = self._build_key(symbol, expiration, strike)
+        avg_price = self.average_cost.get(key, 0.0)
+        if not avg_price:
+            return 0.0
+        if current_price is None:
+            raise ValueError("current_price must be provided")
+        return (float(current_price) - avg_price) / avg_price * 100

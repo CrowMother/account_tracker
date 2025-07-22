@@ -47,8 +47,17 @@ async def poll_schwab(
                     change = tracker.update_and_get_change(
                         symbol, float(price)
                     )
+                    pct_gain = 0.0
                     trade_pnl = None
                     if qty is not None and side is not None:
+                        side = side.upper()
+                        if side == "SELL":
+                            pct_gain = position_tracker.get_percent_gain(
+                                symbol,
+                                expiration,
+                                strike,
+                                float(price),
+                            )
                         try:
                             trade_pnl = position_tracker.add_trade(
                                 symbol,
@@ -69,19 +78,12 @@ async def poll_schwab(
 
                     status = ""
                     if side:
-                        side = side.upper()
                         if side == "BUY":
                             status = "Opening \U0001F7E2"
                         elif open_qty > 0:
                             status = "Partially Closed \U0001F7E1"
                         else:
                             status = "Fully Closed \U0001F7E5"
-
-                    pct_gain = 0.0
-                    if trade_pnl is not None and qty:
-                        basis = float(price) * float(qty) - trade_pnl
-                        if basis != 0:
-                            pct_gain = trade_pnl / basis * 100
 
                     message = compose_trade_message(
                         template,
