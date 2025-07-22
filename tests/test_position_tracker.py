@@ -46,3 +46,30 @@ def test_fifo_by_contract():
     pnl_second = tracker.calculate_pnl("AAPL", "2024-02-16", 175.0)
     assert round(pnl_first, 2) == round(200 / 1000 * 100, 2)
     assert pnl_second == 0.0
+
+
+def test_percent_gain_multiple_buys_partial_sell():
+    tracker = PositionTracker()
+    tracker.add_trade("AAPL", 1, 100.0, "BUY", "2024-01-19", 170.0)
+    tracker.add_trade("AAPL", 1, 120.0, "BUY", "2024-01-19", 170.0)
+
+    gain = tracker.get_percent_gain(
+        "AAPL", "2024-01-19", 170.0, current_price=130.0
+    )
+    assert round(gain, 2) == round((130 - 110) / 110 * 100, 2)
+
+    pnl_trade = tracker.add_trade(
+        "AAPL", 1, 130.0, "SELL", "2024-01-19", 170.0
+    )
+    assert pnl_trade == 30.0
+    assert tracker.get_open_quantity("AAPL", "2024-01-19", 170.0) == 1
+
+    gain = tracker.get_percent_gain(
+        "AAPL", "2024-01-19", 170.0, current_price=115.0
+    )
+    assert round(gain, 2) == round((115 - 120) / 120 * 100, 2)
+
+    pnl_trade = tracker.add_trade(
+        "AAPL", 1, 115.0, "SELL", "2024-01-19", 170.0
+    )
+    assert pnl_trade == -5.0
