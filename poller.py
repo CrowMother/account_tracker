@@ -6,7 +6,7 @@ from flatten import flatten_dataset
 from tracker import PriceTracker
 from position_tracker import PositionTracker
 from discord_client import send_message
-from messaging import format_trade
+from messaging import compose_trade_message
 
 
 async def poll_schwab(
@@ -14,7 +14,7 @@ async def poll_schwab(
     interval_secs: float = 5,
     tracker: PriceTracker | None = None,
     position_tracker: PositionTracker | None = None,
-    template: str = "Contract {ticker} change {pct_change:.2f}%",
+    template: str = None,
     sent_trade_ids: set[
         tuple[int | None, str | None, str | None]
     ] | None = None,
@@ -47,9 +47,10 @@ async def poll_schwab(
                     change = tracker.update_and_get_change(
                         symbol, float(price)
                     )
+                    trade_pnl = None
                     if qty is not None and side is not None:
                         try:
-                            position_tracker.add_trade(
+                            trade_pnl = position_tracker.add_trade(
                                 symbol,
                                 float(qty),
                                 float(price),
@@ -65,12 +66,31 @@ async def poll_schwab(
                     pnl = position_tracker.calculate_pnl(
                         symbol, expiration, strike
                     )
-                    message = format_trade(
+
+                    status = ""
+                    if side:
+                        side = side.upper()
+                        if side == "BUY":
+                            status = "Opening \U0001F7E2"
+                        elif open_qty > 0:
+                            status = "Partially Closed \U0001F7E1"
+                        else:
+                            status = "Fully Closed \U0001F7E5"
+
+                    pct_gain = 0.0
+                    if trade_pnl is not None and qty:
+                        basis = float(price) * float(qty) - trade_pnl
+                        if basis != 0:
+                            pct_gain = trade_pnl / basis * 100
+
+                    message = compose_trade_message(
                         template,
                         ticker=symbol,
                         pct_change=change,
                         open_qty=open_qty,
                         pnl=pnl,
+                        status=status,
+                        pct_gain=pct_gain,
                         **trade,
                     )
                     trade_id = (
