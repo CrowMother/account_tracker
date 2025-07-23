@@ -73,3 +73,37 @@ def test_percent_gain_multiple_buys_partial_sell():
         "AAPL", 1, 115.0, "SELL", "2024-01-19", 170.0
     )
     assert pnl_trade == -5.0
+
+
+def test_average_cost_updates_and_reset():
+    tracker = PositionTracker()
+    key = ("AAPL", "", 0.0)
+    # first buy sets average cost
+    tracker.add_trade("AAPL", 1, 100.0, "BUY")
+    assert tracker.average_cost[key] == 100.0
+
+    # second buy updates weighted average
+    tracker.add_trade("AAPL", 1, 110.0, "BUY")
+    assert tracker.average_cost[key] == 105.0
+
+    # sell one lot recalculates average of remaining
+    tracker.add_trade("AAPL", 1, 120.0, "SELL")
+    assert tracker.average_cost[key] == 110.0
+
+    # sell remaining lot resets average cost to zero
+    tracker.add_trade("AAPL", 1, 115.0, "SELL")
+    assert tracker.get_open_quantity("AAPL") == 0
+    assert tracker.average_cost[key] == 0.0
+
+
+def test_calculate_pnl_zero_basis():
+    tracker = PositionTracker()
+    tracker.add_trade("AAPL", 1, 100.0, "BUY")
+    assert tracker.calculate_pnl("AAPL") == 0.0
+
+
+def test_get_percent_gain_negative_return():
+    tracker = PositionTracker()
+    tracker.add_trade("AAPL", 2, 100.0, "BUY")
+    gain = tracker.get_percent_gain("AAPL", current_price=90.0)
+    assert round(gain, 2) == round((90 - 100) / 100 * 100, 2)
