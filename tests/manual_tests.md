@@ -39,6 +39,7 @@
    - Execute a series of buys and sells that first partially close and then fully close a position.
    - Observe the log output for open quantity and PnL after each trade.
    - Check the Discord channel for messages showing `Opening`, `Partially Closed` and `Fully Closed` statuses along with the correct gain percentages.
+   - Ensure each message displays the gain formatted as a percentage next to the status.
 
 ## Docker Usage
 
