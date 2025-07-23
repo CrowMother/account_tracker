@@ -128,9 +128,12 @@ class PositionTracker:
         expiration: str | None = None,
         strike: float | None = None,
         current_price: float | None = None,
-    ) -> float:
+    ) -> float:ikqyog-codex/add-manual-test-scenarios-in-tests/manual_tests.md
+        """Return the percent difference between the current price and
+        the open average."""
         """Return percent difference between ``current_price`` and the
         average open cost."""
+        codex
         key = self._build_key(symbol, expiration, strike)
         avg_price = self.average_cost.get(key, 0.0)
         if not avg_price:
