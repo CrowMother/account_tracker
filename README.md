@@ -85,25 +85,29 @@ These objects can be written to a file or further processed as needed.
 ### Trade Messages
 
 Each flattened trade is formatted into a short string before being sent to
-Discord (if `DISCORD_BOT_TOKEN` is configured). The default template is:
+Discord (if `DISCORD_BOT_TOKEN` is configured). The default template now
+includes the contract expiration and strike price along with a status indicator
+and percent gain:
 
 ```
-Contract {ticker} change {pct_change:.2f}%
+Contract {ticker} change {pct_change:.2f}% {expiration} {strike} @${price:.2f} {status} {pct_gain:.2f}%
 ```
 
-The template accepts any keys from the flattened trade dictionary, plus the
-calculated `pct_change` from the `PriceTracker`. For instance, a more detailed
-template could look like:
+`pct_change` is the price change from the last poll, while `pct_gain` reflects
+the realized gain for the closing quantity compared with its average open cost.
+`status` shows whether the trade is opening, partially closing or fully
+closing.
+
+Example messages using the default template:
 
 ```
-{ticker} {price} {strike} {open_close} {pct_change}
+Contract AAPL change 0.00% 2024-01-19 170.0 @$100.00 Opening 🟢 0.00%
+Contract AAPL change 10.00% 2024-01-19 170.0 @$110.00 Partially Closed 🟡 10.00%
+Contract AAPL change 9.09% 2024-01-19 170.0 @$120.00 Fully Closed 🔴 20.00%
 ```
 
-Which might produce an output similar to:
-
-```
-AAPL 175.00 170C OPEN 0.50%
-```
+You can customize this template by passing a different format string to
+`poll_schwab()` or by modifying the call in `main.py`.
 
 The poller also maintains open contract counts and realized win/loss
 percentages using a FIFO cost basis. These values are available as
@@ -120,8 +124,8 @@ each time a trade is processed.
    difference between the sell price and that lot's purchase price is recorded.
    The cumulative realized profit is divided by the total cost basis of all
    closed lots to produce the ``pnl`` percentage.
-3. **Current open quantity** – ``open_qty`` is simply the sum of the remaining
+3. **Percent gain on open positions** – ``pct_gain`` compares the current
+   price to the average cost of the remaining lots for that contract.
+4. **Current open quantity** – ``open_qty`` is simply the sum of the remaining
    quantities in the queue for the symbol.
 
-To use a custom template, pass it to `poll_schwab()` or modify the call in
-`main.py`.
