@@ -129,7 +129,8 @@ class PositionTracker:
         strike: float | None = None,
         current_price: float | None = None,
     ) -> float:
-        """Return percent difference between ``current_price`` and open average."""
+        """Return the percent difference between the current price and
+        the open average."""
         key = self._build_key(symbol, expiration, strike)
         avg_price = self.average_cost.get(key, 0.0)
         if not avg_price:
