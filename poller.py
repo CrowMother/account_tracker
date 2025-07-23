@@ -48,7 +48,6 @@ async def poll_schwab(
                         symbol, float(price)
                     )
                     pct_gain = 0.0
-                    trade_pnl = None
                     if qty is not None and side is not None:
                         side = side.upper()
                         if side == "SELL":
@@ -59,7 +58,7 @@ async def poll_schwab(
                                 float(price),
                             )
                         try:
-                            trade_pnl = position_tracker.add_trade(
+                            position_tracker.add_trade(
                                 symbol,
                                 float(qty),
                                 float(price),
