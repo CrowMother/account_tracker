@@ -33,6 +33,13 @@
    - The open quantity should return to zero.
    - Verify the win/loss percentage equals total realized profit divided by the cost basis of the closed lots.
 
+9. **Trade Lifecycle with Discord Confirmation**
+   - Set `SCHWAB_APP_KEY`, `SCHWAB_APP_SECRET`, `DISCORD_BOT_TOKEN` and `DISCORD_CHANNEL_ID` in your environment.
+   - Run `python main.py` so trades are processed and messages are sent.
+   - Execute a series of buys and sells that first partially close and then fully close a position.
+   - Observe the log output for open quantity and PnL after each trade.
+   - Check the Discord channel for messages showing `Opening`, `Partially Closed` and `Fully Closed` statuses along with the correct gain percentages.
+
 ## Docker Usage
 
 1. **Build the Docker image**
