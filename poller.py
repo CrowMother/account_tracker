@@ -7,6 +7,7 @@ from tracker import PriceTracker
 from position_tracker import PositionTracker
 from discord_client import send_message
 from messaging import compose_trade_message
+import json
 
 
 async def poll_schwab(
@@ -33,6 +34,9 @@ async def poll_schwab(
     while True:
         try:
             data = client.get_account_positions()
+            #write to file for debugging data
+            with open("debug_data.json", "w") as f:
+                json.dump(data, f, indent=4)
             if data:
                 trades = flatten_dataset(data)
                 for trade in trades:

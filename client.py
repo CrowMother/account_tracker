@@ -58,7 +58,7 @@ class SchwabClient:
     def __init__(self, key: str, secret: str):
         self.client = create_schwab_client(key, secret)
 
-    def get_account_positions(self, status: str | None = None, hours: int = 1):
+    def get_account_positions(self, status: str | None = None, hours: int = 168):
         """Return account orders between ``hours`` ago and now."""
 
         def fetch_orders():
